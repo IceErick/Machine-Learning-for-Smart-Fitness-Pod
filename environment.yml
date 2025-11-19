@@ -1,0 +1,14 @@
+name: Machine-Learning-for-Smart-Fitness-Pod
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - pip
+  - numpy
+  - pandas
+  - matplotlib
+  - scikit-learn
+  - scipy
+  - jupyterlab
+  - ipykernel
