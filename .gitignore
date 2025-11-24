@@ -1,5 +1,6 @@
 .DS_Store
 .vscode
+.idea
 AGENTS.md
 *ssh-agent*
 *.pub

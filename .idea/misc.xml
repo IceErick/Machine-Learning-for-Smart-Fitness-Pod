@@ -3,5 +3,8 @@
   <component name="Black">
     <option name="sdkName" value="Machine-Learning-for-Smart-Fitness-Pod" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Machine-Learning-for-Smart-Fitness-Pod" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="GRP" project-jdk-type="Python SDK" />
+  <component name="PythonCompatibilityInspectionAdvertiser">
+    <option name="version" value="3" />
+  </component>
 </project>
