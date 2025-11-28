@@ -5,26 +5,6 @@ Exposes convenience utilities so downstream notebooks and scripts can
 import from fitness_ai without worrying about the underlying layout.
 """
 
-from fitness_ai.data import (
-    ACCEL_COLS,
-    DATA_COLUMNS,
-    FS_HZ,
-    GYRO_COLS,
-    TIMESTAMP_COL,
-    FileMetadata,
-    PreprocessConfig,
-    PreprocessResult,
-    add_time_seconds,
-    append_metadata_row,
-    apply_lowpass_filter,
-    detect_repetitions,
-    interpolate_and_resample,
-    load_raw_dataframe,
-    parse_filename,
-    preprocess_file,
-    slice_segments,
-    sliding_windows,
-)
 from fitness_ai.utils.paths import (
     get_data_dir,
     get_metadata_index_path,
