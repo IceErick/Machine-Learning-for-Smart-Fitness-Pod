@@ -46,8 +46,10 @@ def create_sliding_windows(df, label_id):
                 'Gyro_X', 'Gyro_Y', 'Gyro_Z']
     data = df[features].values
     
-    # 2. 先滤波！(建议先滤波再裁剪，保证信号边缘平滑)
-    data_filtered = butter_lowpass_filter(data)
+    # # 2. 先滤波！(建议先滤波再裁剪，保证信号边缘平滑)
+    # data_filtered = butter_lowpass_filter(data)
+    # 2. 不做滤波，直接用原始数据
+    data_filtered = data.astype(float)
     
     # 3. === 新增：去除首尾数据 ===
     total_len = len(data_filtered)

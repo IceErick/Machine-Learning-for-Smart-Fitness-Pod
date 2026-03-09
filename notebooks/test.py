@@ -143,7 +143,7 @@ def test_new_csv(csv_path, model_path):
 if __name__ == "__main__":
     # 替换成你要测试的新 CSV 文件路径
     # 最好找一个没参与过训练的文件
-    TEST_CSV = '/Users/aziko/Documents/grp/Machine-Learning-for-Smart-Fitness-Pod/data/仰卧起坐2___l.csv'
+    TEST_CSV = '/Users/aziko/Documents/grp/Machine-Learning-for-Smart-Fitness-Pod/data/raw3/sensor_data_1772624544130田欣蹲起.csv'
     
     # 模型路径
     MODEL_FILE = 'miniresnet_model.keras'
