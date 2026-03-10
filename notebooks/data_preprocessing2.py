@@ -7,8 +7,9 @@ from data_preprocessing import create_sliding_windows
 # 定义动作对应的文件夹或文件名关键词
 # 格式: '关键词': Label_ID
 LABEL_MAP = {
-    'rest': 0,   # 文件名包含 rest 的，标签为 0 (走路、喝水、乱动都命名为 rest_xxx.csv)
-    'squat': 1,  # 文件名包含 squat 的，标签为 1   # 文件名包含 jump 的，标签为 2
+    'rest': 0,      # 文件名包含 rest 的，标签为 0 (走路、喝水、乱动都命名为 rest_xxx.csv)
+    'squat': 1,     # 文件名包含 squat 的，标签为 1
+    'bicep': 2,     # 文件名包含 bicep 的，标签为 2 (弯举/bicep curl)
 }
 
 def load_and_process_all_files(data_dir):
