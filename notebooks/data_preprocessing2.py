@@ -11,7 +11,7 @@ LABEL_MAP = {
     'squat': 1,     # 文件名包含 squat 的，标签为 1
     'bicep': 2,     # 文件名包含 bicep 的，标签为 2 (弯举/bicep curl)
     'bench': 3,
-    'run': 4
+    'run': 4,
 }
 
 def load_and_process_all_files(data_dir):
@@ -65,7 +65,7 @@ def load_and_process_all_files(data_dir):
 if __name__ == "__main__":
     # 假设你的所有 csv 都扔在这个文件夹里
     # 比如: rest_walk.csv, rest_stand.csv, squat_fast.csv...
-    DATA_DIR = '/Users/erickli/GitRepos/Machine-Learning-for-Smart-Fitness-Pod/data/raw2'
+    DATA_DIR = 'data/raw2'
     
     X_train, y_train = load_and_process_all_files(DATA_DIR)
     
