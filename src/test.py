@@ -3,7 +3,6 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import os
-from data_preprocessing import butter_lowpass_filter
 
 # ==========================================
 # 1. Configuration
@@ -29,12 +28,9 @@ def preprocess_for_inference(df):
                 'Gyro_X', 'Gyro_Y', 'Gyro_Z']
 
     # 1. Extract data
-    raw_data = df[features].values
+    filtered_data = df[features].values
 
-    # 2. Filter
-    filtered_data = butter_lowpass_filter(raw_data)
-
-    # 3. Sliding window
+    # 2. Sliding window
     X_windows = []
     time_indices = [] # Record the end index of each window for plot positioning
 
@@ -140,7 +136,7 @@ def test_new_csv(csv_path, model_path):
 # ==========================================
 if __name__ == "__main__":
     # A file that was not used in training
-    TEST_CSV = 'data/raw3/sensor_data_1766482134374_run周跑步9kph5分钟.csv'
+    TEST_CSV = '/Users/aziko/Documents/grp/Machine-Learning-for-Smart-Fitness-Pod/data/raw3/sensor_data_1774964218827Erick_run.csv'
 
     # Model path
     MODEL_FILE = 'miniresnet_model.keras'
