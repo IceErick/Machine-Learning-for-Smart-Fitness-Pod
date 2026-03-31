@@ -33,10 +33,10 @@ def load_and_process_all_files(data_dir):
                 break
 
         if current_label == -1:
-            print(f"跳过文件 (未匹配到标签): {filename}")
+            print(f"Skipping file (no matching label): {filename}")
             continue
 
-        print(f"正在处理: {filename} -> Label {current_label}")
+        print(f"Processing: {filename} -> Label {current_label}")
 
         try:
             df = pd.read_csv(file_path)
@@ -46,12 +46,12 @@ def load_and_process_all_files(data_dir):
             if len(X_chunk) > 0:
                 all_X.append(X_chunk)
                 all_y.append(y_chunk)
-                print(f"  - 生成样本: {len(X_chunk)}")
+                print(f"  - Generated samples: {len(X_chunk)}")
             else:
-                print(f"  - 数据过短，未生成样本")
+                print(f"  - Data too short, no samples generated")
 
         except Exception as e:
-            print(f"  - 处理出错: {e}")
+            print(f"  - Processing error: {e}")
 
     # Merge all data
     if len(all_X) > 0:
@@ -69,16 +69,16 @@ if __name__ == "__main__":
 
     if len(X_train) > 0:
         print("=" * 30)
-        print(f"处理完毕！")
+        print(f"Processing completed!")
         print(f"X_train shape: {X_train.shape}")
         print(f"y_train shape: {y_train.shape}")
 
         # Quick check on class distribution
         unique, counts = np.unique(y_train, return_counts=True)
-        print("各类别样本分布:", dict(zip(unique, counts)))
+        print("Class distribution:", dict(zip(unique, counts)))
 
         np.save('X_train.npy', X_train)
         np.save('y_train.npy', y_train)
-        print("已保存 .npy 文件")
+        print(".npy files saved")
     else:
-        print("错误：没有生成任何数据，请检查文件夹路径和文件名。")
+        print("Error: No data was generated. Please check the folder path and filenames.")

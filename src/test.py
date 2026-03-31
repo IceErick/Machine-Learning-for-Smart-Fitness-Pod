@@ -45,16 +45,16 @@ def preprocess_for_inference(df):
 # 3. Core testing logic
 # ==========================================
 def test_new_csv(csv_path, model_path):
-    print(f"正在加载模型: {model_path} ...")
+    print(f"Loading model: {model_path} ...")
     try:
         model = tf.keras.models.load_model(model_path)
     except OSError:
-        print("错误：找不到模型文件。请确保 miniresnet_model.keras 存在。")
+        print("Error: Model file not found. Please ensure miniresnet_model.keras exists.")
         return
 
-    print(f"正在读取数据: {csv_path} ...")
+    print(f"Reading data: {csv_path} ...")
     if not os.path.exists(csv_path):
-        print("错误：找不到CSV文件。")
+        print("Error: CSV file not found.")
         return
 
     df = pd.read_csv(csv_path)
@@ -63,10 +63,10 @@ def test_new_csv(csv_path, model_path):
     X_test, time_indices, full_signal = preprocess_for_inference(df)
 
     if len(X_test) == 0:
-        print("数据太短，无法构成一个完整的窗口。")
+        print("Data too short to form a complete window.")
         return
 
-    print(f"生成了 {len(X_test)} 个测试窗口，开始推理...")
+    print(f"Generated {len(X_test)} test windows, starting inference...")
 
     # === Predict ===
     # predictions is a probability matrix, e.g. [[0.1, 0.8, 0.1], [0.9, 0.05, 0.05]...]
@@ -86,7 +86,7 @@ def test_new_csv(csv_path, model_path):
     plt.plot(full_signal[:, 2], color='gray', alpha=0.5, label='Filtered Acc Z')
 
     # --- Mark prediction results on the signal ---
-    print("\n=== 检测结果详情 ===")
+    print("\n=== Detection Details ===")
 
     # To avoid too much output, only print when the predicted state changes
     last_pred = -1
@@ -110,7 +110,7 @@ def test_new_csv(csv_path, model_path):
             # Simple console output
             if pred_class != last_pred:
                 timestamp = end_idx / SAMPLING_RATE
-                print(f"时间 {timestamp:.1f}s -> 动作切换为: {class_names[pred_class]} (置信度: {conf:.2f})")
+                print(f"Time {timestamp:.1f}s -> Action switched to: {class_names[pred_class]} (confidence: {conf:.2f})")
                 last_pred = pred_class
 
     plt.title(f"模型测试结果: {os.path.basename(csv_path)}")

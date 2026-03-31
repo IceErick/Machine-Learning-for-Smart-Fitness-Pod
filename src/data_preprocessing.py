@@ -16,8 +16,8 @@ TRIM_SAMPLES = int(SAMPLING_RATE * TRIM_SECONDS) # 3 * 104 = 312 samples
 WINDOW_SIZE = int(SAMPLING_RATE * WINDOW_SECONDS)  # 260
 STEP_SIZE = int(WINDOW_SIZE * (1 - OVERLAP_RATIO)) # 130
 
-print(f"配置确认: 窗口大小={WINDOW_SIZE}, 步长={STEP_SIZE}")
-print(f"裁剪策略: 首尾各去除 {TRIM_SAMPLES} 个样本 ({TRIM_SECONDS}秒)")
+print(f"Config check: window_size={WINDOW_SIZE}, step_size={STEP_SIZE}")
+print(f"Trim strategy: remove {TRIM_SAMPLES} samples from both ends ({TRIM_SECONDS}s)")
 # ==========================================
 # 2. Core: Sliding Window Function
 # ==========================================
@@ -41,14 +41,14 @@ def create_sliding_windows(df, label_id):
 
     # Ensure data is long enough to trim
     if total_len > (2 * TRIM_SAMPLES + WINDOW_SIZE):
-        print(f"  [裁剪前] 数据长度: {total_len}")
+        print(f"  [Before trim] data length: {total_len}")
 
         # Slice: remove first and last 312 samples
         data_filtered = data_filtered[TRIM_SAMPLES : -TRIM_SAMPLES]
 
-        print(f"  [裁剪后] 数据长度: {len(data_filtered)} (去除了首尾各 {TRIM_SECONDS}s)")
+        print(f"  [After trim] data length: {len(data_filtered)} (removed {TRIM_SECONDS}s from both ends)")
     else:
-        print(f"  [警告] 数据过短 ({total_len})，无法执行 {TRIM_SECONDS}s 裁剪，跳过此步骤。")
+        print(f"  [Warning] Data too short ({total_len}); cannot apply {TRIM_SECONDS}s trim. Skipping this step.")
 
     # 4. Start sliding window loop
     X_windows = []

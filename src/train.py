@@ -18,19 +18,19 @@ class_names = {
 # ==========================================
 # 1. Prepare data
 # ==========================================
-print("正在加载数据...")
+print("Loading data...")
 try:
     X = np.load('X_train.npy')
     y = np.load('y_train.npy')
 except FileNotFoundError:
-    print("找不到 X_train.npy 或 y_train.npy，请先运行文件2生成数据。")
+    print("X_train.npy or y_train.npy not found. Please run file 2 first to generate data.")
     exit()
 
-print(f"数据形状: {X.shape}")
+print(f"Data shape: {X.shape}")
 
 # Dynamically get the number of classes
 num_classes = len(np.unique(y))
-print(f"检测到类别数量: {num_classes}")
+print(f"Detected number of classes: {num_classes}")
 
 # Split data
 X_train, X_test, y_train, y_test = train_test_split(
@@ -109,7 +109,7 @@ model.summary()
 # ==========================================
 # 3. Training
 # ==========================================
-print("\n开始训练 MiniResNet...")
+print("\nStarting MiniResNet training...")
 history = model.fit(
     X_train, y_train,
     epochs=20,          
@@ -121,7 +121,7 @@ history = model.fit(
 # 4. Evaluation and conversion
 # ==========================================
 loss, acc = model.evaluate(X_test, y_test, verbose=0)
-print(f"\n测试集准确率: {acc*100:.2f}%")
+print(f"\nTest accuracy: {acc*100:.2f}%")
 
 y_pred = np.argmax(model.predict(X_test), axis=1)
 
@@ -144,13 +144,13 @@ plt.savefig('confusion_matrix.png')
 plt.show()
 
 if acc > 0.85: # Set a saving threshold
-    print("✅ 模型表现良好，开始保存...")
+    print("✅ Model performance is good, starting save...")
 
     # 1. Save Keras native model
     model.save('miniresnet_model.keras')
 
     # 2. Convert to TFLite
-    print("正在转换为 TFLite...")
+    print("Converting to TFLite...")
     try:
         # Define input signature, fix Batch Size = 1
         run_model = tf.function(lambda x: model(x))
@@ -167,13 +167,13 @@ if acc > 0.85: # Set a saving threshold
 
         with open('miniresnet_model.tflite', 'wb') as f:
             f.write(tflite_model)
-        print("🎉 TFLite 模型转换成功: miniresnet_model.tflite")
+        print("🎉 TFLite model conversion successful: miniresnet_model.tflite")
 
     except Exception as e:
-        print(f"❌ 本地转换失败: {e}")
-        print("请使用 Google Colab 并上传 .keras 文件进行转换。")
+        print(f"❌ Local conversion failed: {e}")
+        print("Please use Google Colab and upload the .keras file for conversion.")
 else:
-    print("⚠️ 准确率未达到预期，不进行保存。")
+    print("⚠️ Accuracy did not meet expectation; skipping save.")
 
 # Plot training curves
 plt.figure(figsize=(10, 4))
