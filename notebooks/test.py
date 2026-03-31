@@ -15,9 +15,11 @@ SAMPLING_RATE = 104
 
 # 类别映射 (根据你之前定义的 LABEL_MAP)
 class_names = {
-    0: "Rest (乱动/静止)",
-    1: "Squat (深蹲)",
-    2: "Bicep Curl (弯举)"
+    0: "Rest",
+    1: "Squat",
+    2: "Bicep",
+    3: "Bench",
+    4: "Run"
 }
 
 # ==========================================
@@ -111,6 +113,9 @@ def test_new_csv(csv_path, model_path):
             if pred_class == 1: color = 'red'    # 深蹲 = 红
             elif pred_class == 2: color = 'blue' # 弯举 = 蓝
             elif pred_class == 0: color = 'green' # 休息 = 绿
+            elif pred_class == 3: color = 'orange' # 杠铃卧推 = 橙
+            elif pred_class == 4: color = 'purple' # 跑步 = 紫
+
             
             # 在图上画线段
             plt.axvspan(start_idx, end_idx, color=color, alpha=0.1)
@@ -131,7 +136,9 @@ def test_new_csv(csv_path, model_path):
     legend_elements = [
         Patch(facecolor='green', alpha=0.3, label='Rest (0)'),
         Patch(facecolor='red', alpha=1, label='Squat (1)'),
-        Patch(facecolor='blue', alpha=1, label='Bicep Curl (2)')
+        Patch(facecolor='blue', alpha=1, label='Bicep Curl (2)'),
+        Patch(facecolor='orange', alpha=1, label='Bench (3)'),
+        Patch(facecolor='purple', alpha=1, label='Run (4)')
     ]
     plt.legend(handles=legend_elements, loc='upper left')
     
@@ -143,7 +150,7 @@ def test_new_csv(csv_path, model_path):
 if __name__ == "__main__":
     # 替换成你要测试的新 CSV 文件路径
     # 最好找一个没参与过训练的文件
-    TEST_CSV = '/Users/aziko/Documents/grp/Machine-Learning-for-Smart-Fitness-Pod/data/raw3/sensor_data_1767510838008周弯举第二组.csv'
+    TEST_CSV = 'data/raw3/sensor_data_1766482134374_run周跑步9kph5分钟.csv'
     
     # 模型路径
     MODEL_FILE = 'miniresnet_model.keras'

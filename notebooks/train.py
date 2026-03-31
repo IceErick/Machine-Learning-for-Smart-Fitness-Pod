@@ -4,6 +4,16 @@ from tensorflow.keras import layers, models, Input, Model
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import os
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+
+class_names = {
+    0: "rest",
+    1: "squat",
+    2: "bicep",
+    3: "bench",
+    4: "run"
+}
 
 # ==========================================
 # 1. 准备数据
@@ -116,6 +126,27 @@ history = model.fit(
 # ==========================================
 loss, acc = model.evaluate(X_test, y_test, verbose=0)
 print(f"\n测试集准确率: {acc*100:.2f}%")
+
+# 在 model.evaluate 之后加：
+y_pred = np.argmax(model.predict(X_test), axis=1)
+
+# 打印 classification report
+print("\n=== Classification Report ===")
+print(classification_report(y_test, y_pred, 
+      target_names=[name for _, name in sorted(class_names.items())]))
+
+# 画 confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+            xticklabels=[name for _, name in sorted(class_names.items())],
+            yticklabels=[name for _, name in sorted(class_names.items())])
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.tight_layout()
+plt.savefig('confusion_matrix.png')
+plt.show()
 
 if acc > 0.85: # 设定一个保存门槛
     print("✅ 模型表现良好，开始保存...")
