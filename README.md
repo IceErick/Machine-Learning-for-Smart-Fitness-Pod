@@ -1,64 +1,62 @@
 # Machine-Learning-for-Smart-Fitness-Pod
-This repo is used to cooperate with group member to carry on machine learning. The trained model is expected to classify different categories of exercise and count repetition for that. 
 
-## About This Project: Smart Fitness Pod - Machine Learning Module
+This repository contains the Machine Learning module for the Smart Fitness Pod. By processing data from wearable IMU sensors, it utilizes a deep learning model (MiniResNet) to perform real-time classification of different exercise categories, providing a foundation for subsequent repetition counting.
 
-Real-time exercise classification and repetition counting using IMU data from wearable sensors.
+## Features
 
-### Features
+- **Multi-Action Recognition**: Currently supports the identification of 5 states/movements:
+  - `Rest` (0) - Resting or daily activities
+  - `Squat` (1) - Squats
+  - `Bicep Curl` (2) - Bicep curls
+  - `Bench Press` (3) - Bench presses
+  - `Run` (4) - Running
+- **Lightweight Model Design**: Utilizes a `MiniResNet` architecture based on 1D-CNN and residual blocks, highly optimized for processing time-series sensor data.
+- **Edge Device Deployment**: Automatically converts the trained model into the `TensorFlow Lite (.tflite)` format, facilitating deployment on microcontrollers (such as nRF52840) or mobile edge devices.
+- **Sliding Window Processing**: Supports customizable window sizes (default 208) and step sizes (default 20), specifically tuned for a 104Hz sensor sampling rate.
 
-- **Real-time Exercise Classification**: Identify different workout movements
-- **Repetition Counting**: Automatically count exercise repetitions
-- **TensorFlow Lite Support**: Optimized for edge device deployment
-- **IMU Data Processing**: Handle accelerometer and gyroscope data
+## Dataset Structure
 
-### Installation
+Sensor CSV data should be organized according to the following directory structure to ensure strict separation between different phases:
 
-```bash
-pip install -e .
+- `data/raw1/`: **Temporary Buffer**. Used for storing unprocessed, unassigned, or newly collected raw data.
+- `data/raw2/`: **Training Data**. The core dataset used for training the model. The script `data_preprocessing2.py` will read files from this directory to generate features and labels. Note: Filenames must contain specific action keywords (e.g., `rest`, `squat`, `bicep`, `bench`, `run`).
+- `data/raw3/`: **Testing Data**. Used for independent inference and evaluation after the model is trained. The script `test.py` calls files from this directory to verify the model's generalization capabilities on unseen data.
+
+## Project Structure
 ```
-
-### Usage
-
-```python
-from fitness_ai import ExerciseClassifier
-
-# Initialize classifier
-classifier = ExerciseClassifier()
-
-# Classify exercise from IMU data
-result = classifier.predict(imu_data)
-```
-
-### Project Structure
-
-```
-fitness_ai/
-├── __init__.py
+Machine-Learning-for-Smart-Fitness-Pod/
 ├── data/
-│   ├── __init__.py
-│   ├── preprocessor.py
-│   └── data_loader.py
-├── models/
-│   ├── __init__.py
-│   ├── exercise_classifier.py
-│   └── repetition_counter.py
-├── training/
-│   ├── __init__.py
-│   ├── trainer.py
-│   └── evaluator.py
-└── utils/
-    ├── __init__.py
-    ├── feature_extractor.py
-    └── model_converter.py
+│   ├── raw1/                  # Temporary buffer
+│   ├── raw2/                  # Training data directory
+│   └── raw3/                  # Testing data directory
+├── src/
+│   ├── data_preprocessing.py  # Base preprocessing functions (e.g., sliding window)
+│   ├── data_preprocessing2.py # Batch processes raw2 data to generate .npy files
+│   ├── train.py               # Trains the MiniResNet model and exports to TFLite
+│   └── test.py                # Reads raw3 data for inference and visualization
+├── X_train.npy                # (Generated) Preprocessed feature matrix
+├── y_train.npy                # (Generated) Preprocessed label array
+├── miniresnet_model.keras     # (Generated) Trained Keras native model
+├── miniresnet_model.tflite    # (Generated) Converted TFLite model
+└── README.md
 ```
+## Quick Start / Usage Guide
 
+### 1. Data Preprocessing
+Ensure your training data is properly named (containing action keywords) and placed in the `data/raw2/` directory. Run the preprocessing script:
+bash
+python src/data_preprocessing2.py
 
+*Upon success, `X_train.npy` and `y_train.npy` will be generated in the root directory.*
 
-## Progress right now (still updating)
+### 2. Model Training
+Use the generated `.npy` data to train the model. The script will automatically split the validation set and train the `MiniResNet`:
+bash
+python src/train.py
 
-### Sample Sensor Data
-- `data/xiao_nr52840_sense_imu_sample.csv` contains 10 seconds of synthetic IMU output that mimics the Seeed Studio XIAO nRF52840 Sense Plus (accelerometer in g, gyroscope in dps, magnetometer in uT).
-- `data/xiao_nr52840_sense_imu_sample_filtered.csv` contains filtered data which are reached after applying low-pass data filtering.
-- Sampling rate is 50 Hz with three motion phases (idle, rhythmic lift, complex rotation) to help test preprocessing and model pipelines.
-- Timestamps are millisecond offsets; convert to seconds by dividing by 1000 if needed.
+*After completion, it will output the accuracy and a confusion matrix. If the accuracy meets the threshold (>85%), it will automatically generate `miniresnet_model.keras` and `miniresnet_model.tflite`.*
+
+### 3. Model Testing and Visualization
+Select an independent test file from `data/raw3/` to verify the actual detection performance. You can modify the `TEST_CSV` path in `test.py` to point to different test files:
+bash
+python src/test.py
