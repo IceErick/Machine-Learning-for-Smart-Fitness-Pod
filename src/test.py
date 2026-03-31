@@ -3,17 +3,16 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import os
-from data_preprocessing import butter_lowpass_filter  # 复用你之前的滤波函数
+from data_preprocessing import butter_lowpass_filter
 
 # ==========================================
-# 1. 配置
+# 1. Configuration
 # ==========================================
-# 必须与训练时完全一致
 WINDOW_SIZE = 208
-STEP_SIZE = 20    # 推理时步长可以小一点（比如20），这样检测更灵敏，时间分辨率更高
+STEP_SIZE = 20
 SAMPLING_RATE = 104
 
-# 类别映射 (根据你之前定义的 LABEL_MAP)
+# Class mapping
 class_names = {
     0: "Rest",
     1: "Squat",
@@ -23,38 +22,31 @@ class_names = {
 }
 
 # ==========================================
-# 2. 推理专用预处理函数
+# 2. Inference-specific preprocessing function
 # ==========================================
 def preprocess_for_inference(df):
-    """
-    与训练时的区别：
-    1. 不裁剪首尾（我们需要看完整的测试过程）
-    2. 不需要 label
-    3. 返回窗口数据 + 每个窗口对应的时间点（用于画图）
-    """
-    features = ['Acceleration_X', 'Acceleration_Y', 'Acceleration_Z', 
+    features = ['Acceleration_X', 'Acceleration_Y', 'Acceleration_Z',
                 'Gyro_X', 'Gyro_Y', 'Gyro_Z']
-    
-    # 1. 提取数据
+
+    # 1. Extract data
     raw_data = df[features].values
-    
-    # 2. 滤波 (必须做！否则会有噪声干扰)
+
+    # 2. Filter
     filtered_data = butter_lowpass_filter(raw_data)
-    
-    # 3. 滑窗
+
+    # 3. Sliding window
     X_windows = []
-    time_indices = [] # 记录每个窗口结束时的索引，方便画图定位
-    
-    # 从 0 开始滑，直到数据结束
+    time_indices = [] # Record the end index of each window for plot positioning
+
     for i in range(0, len(filtered_data) - WINDOW_SIZE + 1, STEP_SIZE):
         window = filtered_data[i : i + WINDOW_SIZE]
         X_windows.append(window)
-        time_indices.append(i + WINDOW_SIZE) # 记录窗口结束点
-        
+        time_indices.append(i + WINDOW_SIZE) # Record window end point
+
     return np.array(X_windows), np.array(time_indices), filtered_data
 
 # ==========================================
-# 3. 核心测试逻辑
+# 3. Core testing logic
 # ==========================================
 def test_new_csv(csv_path, model_path):
     print(f"正在加载模型: {model_path} ...")
@@ -68,59 +60,58 @@ def test_new_csv(csv_path, model_path):
     if not os.path.exists(csv_path):
         print("错误：找不到CSV文件。")
         return
-        
+
     df = pd.read_csv(csv_path)
-    
-    # 预处理
+
+    # Preprocess
     X_test, time_indices, full_signal = preprocess_for_inference(df)
-    
+
     if len(X_test) == 0:
         print("数据太短，无法构成一个完整的窗口。")
         return
 
     print(f"生成了 {len(X_test)} 个测试窗口，开始推理...")
-    
-    # === 预测 ===
-    # predictions 是一个概率矩阵，比如 [[0.1, 0.8, 0.1], [0.9, 0.05, 0.05]...]
+
+    # === Predict ===
+    # predictions is a probability matrix, e.g. [[0.1, 0.8, 0.1], [0.9, 0.05, 0.05]...]
     predictions = model.predict(X_test)
-    
-    # 取出最大概率对应的索引 (0, 1, 或 2)
+
+    # Get the index with highest probability (0, 1, or 2)
     predicted_classes = np.argmax(predictions, axis=1)
-    # 取出这个预测的可信度 (Confidence)
+    # Get the confidence of the prediction
     confidences = np.max(predictions, axis=1)
 
     # ==========================================
-    # 4. 结果可视化
+    # 4. Result visualization
     # ==========================================
     plt.figure(figsize=(12, 6))
-    
-    # --- 画原始信号 (只画 Acc Z轴，通常深蹲这个轴变化最明显) ---
-    # 你也可以改成 Acc Y 或 X，看你的设备佩戴方向
+
+    # --- Plot raw signal (only Acc Z-axis, usually most prominent for squats) ---
     plt.plot(full_signal[:, 2], color='gray', alpha=0.5, label='Filtered Acc Z')
-    
-    # --- 在信号上标记预测结果 ---
+
+    # --- Mark prediction results on the signal ---
     print("\n=== 检测结果详情 ===")
-    
-    # 为了避免打印太多，我们只打印状态变化的时刻
+
+    # To avoid too much output, only print when the predicted state changes
     last_pred = -1
-    
+
     for i, (pred_class, conf, end_idx) in enumerate(zip(predicted_classes, confidences, time_indices)):
         start_idx = end_idx - WINDOW_SIZE
-        
-        # 只有当置信度 > 0.6 时才认为是有效预测，否则视为噪音
+
+        # Only treat as valid prediction if confidence > 0.6, otherwise consider as noise
         if conf > 0.6:
             color = 'white'
-            if pred_class == 1: color = 'red'    # 深蹲 = 红
-            elif pred_class == 2: color = 'blue' # 弯举 = 蓝
-            elif pred_class == 0: color = 'green' # 休息 = 绿
-            elif pred_class == 3: color = 'orange' # 杠铃卧推 = 橙
-            elif pred_class == 4: color = 'purple' # 跑步 = 紫
+            if pred_class == 1: color = 'red'    # Squat = red
+            elif pred_class == 2: color = 'blue' # Bicep curl = blue
+            elif pred_class == 0: color = 'green' # Rest = green
+            elif pred_class == 3: color = 'orange' # Bench press = orange
+            elif pred_class == 4: color = 'purple' # Run = purple
 
-            
-            # 在图上画线段
+
+            # Draw segment on the plot
             plt.axvspan(start_idx, end_idx, color=color, alpha=0.1)
-            
-            # 简单的控制台输出 (去重)
+
+            # Simple console output
             if pred_class != last_pred:
                 timestamp = end_idx / SAMPLING_RATE
                 print(f"时间 {timestamp:.1f}s -> 动作切换为: {class_names[pred_class]} (置信度: {conf:.2f})")
@@ -130,8 +121,8 @@ def test_new_csv(csv_path, model_path):
     plt.xlabel("Sample Index")
     plt.ylabel("Acceleration Z")
     plt.legend(loc='upper right')
-    
-    # 创建自定义图例
+
+    # Create custom legend
     from matplotlib.patches import Patch
     legend_elements = [
         Patch(facecolor='green', alpha=0.3, label='Rest (0)'),
@@ -141,18 +132,17 @@ def test_new_csv(csv_path, model_path):
         Patch(facecolor='purple', alpha=1, label='Run (4)')
     ]
     plt.legend(handles=legend_elements, loc='upper left')
-    
+
     plt.show()
 
 # ==========================================
-# 5. 运行
+# 5. Run
 # ==========================================
 if __name__ == "__main__":
-    # 替换成你要测试的新 CSV 文件路径
-    # 最好找一个没参与过训练的文件
+    # A file that was not used in training
     TEST_CSV = 'data/raw3/sensor_data_1766482134374_run周跑步9kph5分钟.csv'
-    
-    # 模型路径
+
+    # Model path
     MODEL_FILE = 'miniresnet_model.keras'
-    
+
     test_new_csv(TEST_CSV, MODEL_FILE)
